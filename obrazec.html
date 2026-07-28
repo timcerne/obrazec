@@ -171,92 +171,96 @@
     <script src="https://kit.fontawesome.com/8c95c978c9.js" crossorigin="anonymous" defer></script>
     
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        
-        
-        const datumPolje = document.getElementById('polje-datum');
-        if (datumPolje) {
-            const danes = new Date();
-            const dan = String(danes.getDate()).padStart(2, '0');
-            const mesec = String(danes.getMonth() + 1).padStart(2, '0'); 
-            const leto = danes.getFullYear();
-            datumPolje.value = `${dan}.${mesec}.${leto}`;
-        }
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // 1. STIKALO ZA DODATNE KROGCE
+    const chkDodatno = document.getElementById('chk-prikazi-dodatno');
+    const kontejnerDodatni = document.querySelector('.dodatni-krogci');
 
-        
-        const chkDodatno = document.getElementById('chk-prikazi-dodatno');
-        const kontejnerDodatni = document.querySelector('.dodatni-krogci');
+    if (chkDodatno && kontejnerDodatni) {
+        // Ob vsakem nalaganju strani odkljukamo in skrijemo
+        chkDodatno.checked = false;
+        kontejnerDodatni.style.display = 'none';
 
-        if (chkDodatno && kontejnerDodatni) {
-            chkDodatno.addEventListener('change', (e) => {
-                kontejnerDodatni.style.display = e.target.checked ? 'block' : 'none';
-            });
-        }
+        // Poslušalec sprememb
+        chkDodatno.addEventListener('change', (e) => {
+            kontejnerDodatni.style.display = e.target.checked ? 'block' : 'none';
+        });
+    }
 
-        
-        const kontejner = document.querySelector('.pdf-container');
-        if (!kontejner) return;
+    // 2. SAMODEJNI DATUM
+    const datumPolje = document.getElementById('polje-datum');
+    if (datumPolje) {
+        const danes = new Date();
+        const dan = String(danes.getDate()).padStart(2, '0');
+        const mesec = String(danes.getMonth() + 1).padStart(2, '0'); 
+        const leto = danes.getFullYear();
+        datumPolje.value = `${dan}.${mesec}.${leto}`;
+    }
 
-        
-        const triPozicije = ['3', '4', '6', '9', '10', '12', '16', '19', '20',
-                             '23', '24', '26', '29', '30', '32', '36', '39', '40'];
-        const pozicije3 = [0, -75, -135];
-        const pozicije2 = [0, -135];
+    // 3. KONFIGURACIJA IN LOGIKA PREMIKANJA
+    const kontejner = document.querySelector('.pdf-container');
+    if (!kontejner) return;
 
-        
-        function posodobiZadnjiKrogec(startId, endId, zadnjiId) {
-            const krogci = document.querySelectorAll('.krogec-oznaka');
-            let ima135 = false;
-            let ima75 = false;
+    const triPozicije = ['3', '4', '6', '9', '10', '12', '16', '19', '20',
+                         '23', '24', '26', '29', '30', '32', '36', '39', '40'];
+    const pozicije3 = [0, -75, -135];
+    const pozicije2 = [0, -135];
 
-            krogci.forEach(krogec => {
-                const idNum = parseInt(krogec.id.replace('krogec-', ''));
-                if (idNum >= startId && idNum < endId) {
-                    const premik = parseInt(krogec.dataset.premikVrednost) || 0;
-                    if (premik === -135) ima135 = true;
-                    if (premik === -75) ima75 = true;
-                }
-            });
+    // Funkcija za avtomatski premik zadnjega krogca (20 ali 40)
+    function posodobiZadnjiKrogec(startId, endId, zadnjiId) {
+        const krogci = document.querySelectorAll('.krogec-oznaka');
+        let ima135 = false;
+        let ima75 = false;
 
-            const zadnjiKrogec = document.getElementById(`krogec-${zadnjiId}`);
-            if (!zadnjiKrogec) return;
-
-            let novPremik = 0;
-            if (ima135) novPremik = -135;
-            else if (ima75) novPremik = -75;
-
-            zadnjiKrogec.dataset.premikVrednost = novPremik;
-            zadnjiKrogec.style.transition = 'transform 0.3s ease-in-out';
-            zadnjiKrogec.style.transform = `translateX(${novPremik}px)`;
-        }
-
-        
-        kontejner.addEventListener('click', (dogodek) => {
-            const kliknjenKrogec = dogodek.target.closest('.krogec-oznaka');
-
-            if (kliknjenKrogec) {
-                if (kliknjenKrogec.id === 'krogec-20' || kliknjenKrogec.id === 'krogec-40') return;
-
-                const krogecId = kliknjenKrogec.id.replace('krogec-', '');
-                const trenutneMoznePozicije = triPozicije.includes(krogecId) ? pozicije3 : pozicije2;
-
-                let trenutniIndeks = parseInt(kliknjenKrogec.dataset.indeksPolja) || 0;
-                trenutniIndeks = (trenutniIndeks + 1) % trenutneMoznePozicije.length;
-                
-                const novPremik = trenutneMoznePozicije[trenutniIndeks];
-                
-                kliknjenKrogec.dataset.indeksPolja = trenutniIndeks;
-                kliknjenKrogec.dataset.premikVrednost = novPremik;
-                
-                kliknjenKrogec.style.transition = 'transform 0.2s ease-in-out';
-                kliknjenKrogec.style.transform = `translateX(${novPremik}px)`;
-
-                
-                posodobiZadnjiKrogec(1, 20, 20);
-                posodobiZadnjiKrogec(21, 40, 40);
+        krogci.forEach(krogec => {
+            const idNum = parseInt(krogec.id.replace('krogec-', ''));
+            if (idNum >= startId && idNum < endId) {
+                const premik = parseInt(krogec.dataset.premikVrednost) || 0;
+                if (premik === -135) ima135 = true;
+                if (premik === -75) ima75 = true;
             }
         });
-    }); 
+
+        const zadnjiKrogec = document.getElementById(`krogec-${zadnjiId}`);
+        if (!zadnjiKrogec) return;
+
+        let novPremik = 0;
+        if (ima135) novPremik = -135;
+        else if (ima75) novPremik = -75;
+
+        zadnjiKrogec.dataset.premikVrednost = novPremik;
+        zadnjiKrogec.style.transition = 'transform 0.3s ease-in-out';
+        zadnjiKrogec.style.transform = `translateX(${novPremik}px)`;
+    }
+
+    // Klik dogodek na krogce
+    kontejner.addEventListener('click', (dogodek) => {
+        const kliknjenKrogec = dogodek.target.closest('.krogec-oznaka');
+
+        if (kliknjenKrogec) {
+            if (kliknjenKrogec.id === 'krogec-20' || kliknjenKrogec.id === 'krogec-40') return;
+
+            const krogecId = kliknjenKrogec.id.replace('krogec-', '');
+            const trenutneMoznePozicije = triPozicije.includes(krogecId) ? pozicije3 : pozicije2;
+
+            let trenutniIndeks = parseInt(kliknjenKrogec.dataset.indeksPolja) || 0;
+            trenutniIndeks = (trenutniIndeks + 1) % trenutneMoznePozicije.length;
+            
+            const novPremik = trenutneMoznePozicije[trenutniIndeks];
+            
+            kliknjenKrogec.dataset.indeksPolja = trenutniIndeks;
+            kliknjenKrogec.dataset.premikVrednost = novPremik;
+            
+            kliknjenKrogec.style.transition = 'transform 0.2s ease-in-out';
+            kliknjenKrogec.style.transform = `translateX(${novPremik}px)`;
+
+            // Osvežimo 20-ko in 40-ko
+            posodobiZadnjiKrogec(1, 20, 20);
+            posodobiZadnjiKrogec(21, 40, 40);
+        }
+    });
+}); 
     </script>
 </head>
 <body>
