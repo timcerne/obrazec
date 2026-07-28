@@ -8,9 +8,24 @@
     body {
         background-color: #f0f0f0;
         display: flex;
-        justify-content: center;
+        flex-direction: column;
+        align-items: center;
         padding: 20px;
         font-family: Arial, sans-serif;
+    }
+
+    
+    .kontrola-dodatno {
+        background: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        font-weight: bold;
     }
 
     .pdf-container {
@@ -31,7 +46,7 @@
         left: 70px;
         background: transparent;
         border: none;
-        font-size: 15px; /* Dodano za boljšo berljivost */
+        font-size: 15px;
     }
 
     .krogec-oznaka {
@@ -40,9 +55,10 @@
         color: black;
         transition: transform 0.5s ease-out; 
         left: 645px;
-        cursor: pointer; /* Spremeni miško v roko za boljšo uporabniško izkušnjo */
+        cursor: pointer;
     }
 
+    
     #krogec-1 {top:217px;}
     #krogec-2 {top:242px;}
     #krogec-3 {top:258px;}
@@ -64,10 +80,41 @@
     #krogec-19 {top:592px;}
     #krogec-20 {top:628px;}
 
+    
+    .dodatni-krogci {
+        display: none; 
+    }
+
+    #krogec-21 {top: calc(217px + 503px);}
+    #krogec-22 {top: calc(242px + 503px);}
+    #krogec-23 {top: calc(258px + 503px);}
+    #krogec-24 {top: calc(276px + 503px);}
+    #krogec-25 {top: calc(291px + 503px);}
+    #krogec-26 {top: calc(307px + 503px);}
+    #krogec-27 {top: calc(326px + 503px);}
+    #krogec-28 {top: calc(343px + 503px);}
+    #krogec-29 {top: calc(359px + 503px);}
+    #krogec-30 {top: calc(384px + 503px);}
+    #krogec-31 {top: calc(409px + 503px);}
+    #krogec-32 {top: calc(425px + 503px);}
+    #krogec-33 {top: calc(442px + 503px);}
+    #krogec-34 {top: calc(476px + 503px);}
+    #krogec-35 {top: calc(492px + 503px);}
+    #krogec-36 {top: calc(525px + 503px);}
+    #krogec-37 {top: calc(542px + 503px);}
+    #krogec-38 {top: calc(575px + 503px);}
+    #krogec-39 {top: calc(592px + 503px);}
+    #krogec-40 {top: calc(628px + 503px);}
+
     @media print {
         @page {
             size: A4;
             margin: 0;
+        }
+
+        
+        .no-print {
+            display: none !important;
         }
 
         body {
@@ -81,7 +128,7 @@
             width: 210mm;      
             height: 297mm;     
             overflow: hidden;
-            box-shadow: none; /* Odstranimo senco pri tiskanju */
+            box-shadow: none;
         }
 
         .ozadje {
@@ -114,17 +161,19 @@
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
+        .dodatni-krogci {
+            position: relative;
+            top: 5px;
+        }
     }   
     </style>
     
-    <!-- FontAwesome skripta z defer -->
     <script src="https://kit.fontawesome.com/8c95c978c9.js" crossorigin="anonymous" defer></script>
     
-    <!-- Vaša JavaScript koda -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         
-        // 1. SAMODEJNI DATUM
+        
         const datumPolje = document.getElementById('polje-datum');
         if (datumPolje) {
             const danes = new Date();
@@ -134,53 +183,59 @@
             datumPolje.value = `${dan}.${mesec}.${leto}`;
         }
 
-        // 2. KONFIGURACIJA
+        
+        const chkDodatno = document.getElementById('chk-prikazi-dodatno');
+        const kontejnerDodatni = document.querySelector('.dodatni-krogci');
+
+        if (chkDodatno && kontejnerDodatni) {
+            chkDodatno.addEventListener('change', (e) => {
+                kontejnerDodatni.style.display = e.target.checked ? 'block' : 'none';
+            });
+        }
+
+        
         const kontejner = document.querySelector('.pdf-container');
         if (!kontejner) return;
 
-        const triPozicije = ['3', '4', '6', '9', '10', '12', '16', '19', '20'];
+        
+        const triPozicije = ['3', '4', '6', '9', '10', '12', '16', '19', '20',
+                             '23', '24', '26', '29', '30', '32', '36', '39', '40'];
         const pozicije3 = [0, -75, -135];
         const pozicije2 = [0, -135];
 
-        // Funkcija, ki avtomatsko premika krogec 20
-        function posodobiKrogec20() {
+        
+        function posodobiZadnjiKrogec(startId, endId, zadnjiId) {
             const krogci = document.querySelectorAll('.krogec-oznaka');
             let ima135 = false;
             let ima75 = false;
 
             krogci.forEach(krogec => {
-                // Preskočimo krogec 20, da ne gleda samega sebe
-                if (krogec.id === 'krogec-20') return;
-
-                const premik = parseInt(krogec.dataset.premikVrednost) || 0;
-                
-                if (premik === -135) ima135 = true;
-                if (premik === -75) ima75 = true;
+                const idNum = parseInt(krogec.id.replace('krogec-', ''));
+                if (idNum >= startId && idNum < endId) {
+                    const premik = parseInt(krogec.dataset.premikVrednost) || 0;
+                    if (premik === -135) ima135 = true;
+                    if (premik === -75) ima75 = true;
+                }
             });
 
-            const krogec20 = document.getElementById('krogec-20');
-            if (!krogec20) return;
+            const zadnjiKrogec = document.getElementById(`krogec-${zadnjiId}`);
+            if (!zadnjiKrogec) return;
 
-            let novPremik20 = 0;
-            if (ima135) {
-                novPremik20 = -135;
-            } else if (ima75) {
-                novPremik20 = -75;
-            }
+            let novPremik = 0;
+            if (ima135) novPremik = -135;
+            else if (ima75) novPremik = -75;
 
-            // Uporabimo isto logiko premika
-            krogec20.dataset.premikVrednost = novPremik20;
-            krogec20.style.transition = 'transform 0.3s ease-in-out';
-            krogec20.style.transform = `translateX(${novPremik20}px)`;
+            zadnjiKrogec.dataset.premikVrednost = novPremik;
+            zadnjiKrogec.style.transition = 'transform 0.3s ease-in-out';
+            zadnjiKrogec.style.transform = `translateX(${novPremik}px)`;
         }
 
-        // Klik dogodek
+        
         kontejner.addEventListener('click', (dogodek) => {
             const kliknjenKrogec = dogodek.target.closest('.krogec-oznaka');
 
             if (kliknjenKrogec) {
-                // Krogec 20 se ne sme odzivati na uporabniške klike, če ga upravlja skripta
-                if (kliknjenKrogec.id === 'krogec-20') return;
+                if (kliknjenKrogec.id === 'krogec-20' || kliknjenKrogec.id === 'krogec-40') return;
 
                 const krogecId = kliknjenKrogec.id.replace('krogec-', '');
                 const trenutneMoznePozicije = triPozicije.includes(krogecId) ? pozicije3 : pozicije2;
@@ -190,15 +245,15 @@
                 
                 const novPremik = trenutneMoznePozicije[trenutniIndeks];
                 
-                // Shranimo vrednost v data-premikVrednost za lažje branje v funkciji 20-ke
                 kliknjenKrogec.dataset.indeksPolja = trenutniIndeks;
                 kliknjenKrogec.dataset.premikVrednost = novPremik;
                 
                 kliknjenKrogec.style.transition = 'transform 0.2s ease-in-out';
                 kliknjenKrogec.style.transform = `translateX(${novPremik}px)`;
 
-                // Po vsakem kliku osvežimo stanje krogca 20
-                posodobiKrogec20();
+                
+                posodobiZadnjiKrogec(1, 20, 20);
+                posodobiZadnjiKrogec(21, 40, 40);
             }
         });
     }); 
@@ -206,10 +261,18 @@
 </head>
 <body>
 
+    <!-- Okvirček s kljukico, ki se NE bo natisnil -->
+    <div class="kontrola-dodatno no-print">
+        <input type="checkbox" id="chk-prikazi-dodatno">
+        <label for="chk-prikazi-dodatno">Prikaži dodatno ocenjevanje</label>
+    </div>
+
     <div class="pdf-container">
         <div class="ozadje"></div>
         <input type="text" id="polje-datum" class="input-field">
+        
         <div class="vsebina-krogci">
+            <!-- Prvi set krogcev (1-20) -->
             <i id="krogec-1" class="fa-regular fa-circle krogec-oznaka"></i>
             <i id="krogec-2" class="fa-regular fa-circle krogec-oznaka"></i>
             <i id="krogec-3" class="fa-regular fa-circle krogec-oznaka"></i>
@@ -230,6 +293,29 @@
             <i id="krogec-18" class="fa-regular fa-circle krogec-oznaka"></i>
             <i id="krogec-19" class="fa-regular fa-circle krogec-oznaka"></i>
             <i id="krogec-20" class="fa-regular fa-circle krogec-oznaka"></i>
+
+            <div class="dodatni-krogci">
+                <i id="krogec-21" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-22" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-23" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-24" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-25" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-26" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-27" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-28" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-29" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-30" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-31" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-32" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-33" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-34" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-35" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-36" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-37" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-38" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-39" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-40" class="fa-regular fa-circle krogec-oznaka"></i>
+            </div>
         </div>
     </div>
 
