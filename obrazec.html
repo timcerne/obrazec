@@ -14,7 +14,6 @@
         font-family: Arial, sans-serif;
     }
 
-    
     .kontrola-dodatno {
         background: white;
         padding: 12px 20px;
@@ -39,6 +38,19 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
     }
 
+    /* POLJE IME IN PRIIMEK */
+    #polje-ime-priimek {
+        position: absolute;
+        color: black;
+        top: 138px; /* Prilagodite, če ni točno na črti! */
+        left: 120px; /* Prilagodite zamik od levega roba */
+        background: transparent;
+        border: none;
+        font-size: 15px;
+        width: 300px; /* Nastavite širino polja */
+    }
+
+    /* PRVI DATUM */
     #polje-datum {
         position: absolute;
         color: black;
@@ -47,6 +59,18 @@
         background: transparent;
         border: none;
         font-size: 15px;
+    }
+
+    /* DRUGI DATUM (privzeto skrit prek JS) */
+    #polje-datum-2 {
+        position: absolute;
+        color: black;
+        top: 657px; /* Prilagojen zamik za spodnji del slike */
+        left: 200px;
+        background: transparent;
+        border: none;
+        font-size: 15px;
+        display: none; /* Upravlja JavaScript */
     }
 
     .krogec-oznaka {
@@ -58,7 +82,7 @@
         cursor: pointer;
     }
 
-    
+    /* Prvi set krogcev */
     #krogec-1 {top:217px;}
     #krogec-2 {top:242px;}
     #krogec-3 {top:258px;}
@@ -80,7 +104,7 @@
     #krogec-19 {top:592px;}
     #krogec-20 {top:628px;}
 
-    
+    /* Drugi set krogcev */
     .dodatni-krogci {
         display: none; 
     }
@@ -112,7 +136,6 @@
             margin: 0;
         }
 
-        
         .no-print {
             display: none !important;
         }
@@ -161,9 +184,55 @@
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
+
         .dodatni-krogci {
             position: relative;
             top: 5px;
+        }
+
+
+        /* Prvi datum pri tisku */
+        #polje-datum {
+            position: absolute !important;
+            top: 135px !important;
+            left: 50px !important;
+            z-index: 10 !important;
+            color: black !important;
+            background: transparent !important;
+            border: none !important;
+            font-size: 15px !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        
+        /* Ime in priimek pri tisku */
+        #polje-ime-priimek {
+            position: absolute !important;
+            top: 118px !important; /* Prilagodite za tisk! */
+            left: 100px !important; /* Prilagodite za tisk! */
+            z-index: 10 !important;
+            color: black !important;
+            background: transparent !important;
+            border: none !important;
+            font-size: 15px !important;
+            width: 300px !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        /* Drugi datum pri tisku */
+        #polje-datum-2 {
+            position: absolute !important;
+            top: 573px !important; /* Prilagojen zamik za tisk */
+            left: 190px !important;
+            z-index: 10 !important;
+            color: black !important;
+            background: transparent !important;
+            border: none !important;
+            font-size: 15px !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
     }   
     </style>
@@ -171,96 +240,104 @@
     <script src="https://kit.fontawesome.com/8c95c978c9.js" crossorigin="anonymous" defer></script>
     
     <script>
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // 1. STIKALO ZA DODATNE KROGCE
-    const chkDodatno = document.getElementById('chk-prikazi-dodatno');
-    const kontejnerDodatni = document.querySelector('.dodatni-krogci');
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        // 1. STIKALO ZA DODATNE KROGCE IN DRUGI DATUM
+        const chkDodatno = document.getElementById('chk-prikazi-dodatno');
+        const kontejnerDodatni = document.querySelector('.dodatni-krogci');
+        const poljeDatum2 = document.getElementById('polje-datum-2');
 
-    if (chkDodatno && kontejnerDodatni) {
-        // Ob vsakem nalaganju strani odkljukamo in skrijemo
-        chkDodatno.checked = false;
-        kontejnerDodatni.style.display = 'none';
+        if (chkDodatno && kontejnerDodatni) {
+            // Ob vsakem nalaganju strani odkljukamo in skrijemo
+            chkDodatno.checked = false;
+            kontejnerDodatni.style.display = 'none';
+            if (poljeDatum2) poljeDatum2.style.display = 'none';
 
-        // Poslušalec sprememb
-        chkDodatno.addEventListener('change', (e) => {
-            kontejnerDodatni.style.display = e.target.checked ? 'block' : 'none';
-        });
-    }
+            // Poslušalec sprememb
+            chkDodatno.addEventListener('change', (e) => {
+                const isChecked = e.target.checked;
+                kontejnerDodatni.style.display = isChecked ? 'block' : 'none';
+                if (poljeDatum2) poljeDatum2.style.display = isChecked ? 'block' : 'none';
+            });
+        }
 
-    // 2. SAMODEJNI DATUM
-    const datumPolje = document.getElementById('polje-datum');
-    if (datumPolje) {
-        const danes = new Date();
-        const dan = String(danes.getDate()).padStart(2, '0');
-        const mesec = String(danes.getMonth() + 1).padStart(2, '0'); 
-        const leto = danes.getFullYear();
-        datumPolje.value = `${dan}.${mesec}.${leto}`;
-    }
+        // 2. SAMODEJNI DATUM
+        const datumPolje = document.getElementById('polje-datum');
+        if (datumPolje) {
+            const danes = new Date();
+            const dan = String(danes.getDate()).padStart(2, '0');
+            const mesec = String(danes.getMonth() + 1).padStart(2, '0'); 
+            const leto = danes.getFullYear();
+            const formatiranDatum = `${dan}.${mesec}.${leto}`;
+            
+            // Nastavimo vrednost obeh datumov
+            datumPolje.value = formatiranDatum;
+            if (poljeDatum2) poljeDatum2.value = formatiranDatum;
+        }
 
-    // 3. KONFIGURACIJA IN LOGIKA PREMIKANJA
-    const kontejner = document.querySelector('.pdf-container');
-    if (!kontejner) return;
+        // 3. KONFIGURACIJA IN LOGIKA PREMIKANJA
+        const kontejner = document.querySelector('.pdf-container');
+        if (!kontejner) return;
 
-    const triPozicije = ['3', '4', '6', '9', '10', '12', '16', '19', '20',
-                         '23', '24', '26', '29', '30', '32', '36', '39', '40'];
-    const pozicije3 = [0, -75, -135];
-    const pozicije2 = [0, -135];
+        const triPozicije = ['3', '4', '6', '9', '10', '12', '16', '19', '20',
+                             '23', '24', '26', '29', '30', '32', '36', '39', '40'];
+        const pozicije3 = [0, -75, -135];
+        const pozicije2 = [0, -135];
 
-    // Funkcija za avtomatski premik zadnjega krogca (20 ali 40)
-    function posodobiZadnjiKrogec(startId, endId, zadnjiId) {
-        const krogci = document.querySelectorAll('.krogec-oznaka');
-        let ima135 = false;
-        let ima75 = false;
+        // Funkcija za avtomatski premik zadnjega krogca (20 ali 40)
+        function posodobiZadnjiKrogec(startId, endId, zadnjiId) {
+            const krogci = document.querySelectorAll('.krogec-oznaka');
+            let ima135 = false;
+            let ima75 = false;
 
-        krogci.forEach(krogec => {
-            const idNum = parseInt(krogec.id.replace('krogec-', ''));
-            if (idNum >= startId && idNum < endId) {
-                const premik = parseInt(krogec.dataset.premikVrednost) || 0;
-                if (premik === -135) ima135 = true;
-                if (premik === -75) ima75 = true;
+            krogci.forEach(krogec => {
+                const idNum = parseInt(krogec.id.replace('krogec-', ''));
+                if (idNum >= startId && idNum < endId) {
+                    const premik = parseInt(krogec.dataset.premikVrednost) || 0;
+                    if (premik === -135) ima135 = true;
+                    if (premik === -75) ima75 = true;
+                }
+            });
+
+            const zadnjiKrogec = document.getElementById(`krogec-${zadnjiId}`);
+            if (!zadnjiKrogec) return;
+
+            let novPremik = 0;
+            if (ima135) novPremik = -135;
+            else if (ima75) novPremik = -75;
+
+            zadnjiKrogec.dataset.premikVrednost = novPremik;
+            zadnjiKrogec.style.transition = 'transform 0.3s ease-in-out';
+            zadnjiKrogec.style.transform = `translateX(${novPremik}px)`;
+        }
+
+        // Klik dogodek na krogce
+        kontejner.addEventListener('click', (dogodek) => {
+            const kliknjenKrogec = dogodek.target.closest('.krogec-oznaka');
+
+            if (kliknjenKrogec) {
+                if (kliknjenKrogec.id === 'krogec-20' || kliknjenKrogec.id === 'krogec-40') return;
+
+                const krogecId = kliknjenKrogec.id.replace('krogec-', '');
+                const trenutneMoznePozicije = triPozicije.includes(krogecId) ? pozicije3 : pozicije2;
+
+                let trenutniIndeks = parseInt(kliknjenKrogec.dataset.indeksPolja) || 0;
+                trenutniIndeks = (trenutniIndeks + 1) % trenutneMoznePozicije.length;
+                
+                const novPremik = trenutneMoznePozicije[trenutniIndeks];
+                
+                kliknjenKrogec.dataset.indeksPolja = trenutniIndeks;
+                kliknjenKrogec.dataset.premikVrednost = novPremik;
+                
+                kliknjenKrogec.style.transition = 'transform 0.2s ease-in-out';
+                kliknjenKrogec.style.transform = `translateX(${novPremik}px)`;
+
+                // Osvežimo 20-ko in 40-ko
+                posodobiZadnjiKrogec(1, 20, 20);
+                posodobiZadnjiKrogec(21, 40, 40);
             }
         });
-
-        const zadnjiKrogec = document.getElementById(`krogec-${zadnjiId}`);
-        if (!zadnjiKrogec) return;
-
-        let novPremik = 0;
-        if (ima135) novPremik = -135;
-        else if (ima75) novPremik = -75;
-
-        zadnjiKrogec.dataset.premikVrednost = novPremik;
-        zadnjiKrogec.style.transition = 'transform 0.3s ease-in-out';
-        zadnjiKrogec.style.transform = `translateX(${novPremik}px)`;
-    }
-
-    // Klik dogodek na krogce
-    kontejner.addEventListener('click', (dogodek) => {
-        const kliknjenKrogec = dogodek.target.closest('.krogec-oznaka');
-
-        if (kliknjenKrogec) {
-            if (kliknjenKrogec.id === 'krogec-20' || kliknjenKrogec.id === 'krogec-40') return;
-
-            const krogecId = kliknjenKrogec.id.replace('krogec-', '');
-            const trenutneMoznePozicije = triPozicije.includes(krogecId) ? pozicije3 : pozicije2;
-
-            let trenutniIndeks = parseInt(kliknjenKrogec.dataset.indeksPolja) || 0;
-            trenutniIndeks = (trenutniIndeks + 1) % trenutneMoznePozicije.length;
-            
-            const novPremik = trenutneMoznePozicije[trenutniIndeks];
-            
-            kliknjenKrogec.dataset.indeksPolja = trenutniIndeks;
-            kliknjenKrogec.dataset.premikVrednost = novPremik;
-            
-            kliknjenKrogec.style.transition = 'transform 0.2s ease-in-out';
-            kliknjenKrogec.style.transform = `translateX(${novPremik}px)`;
-
-            // Osvežimo 20-ko in 40-ko
-            posodobiZadnjiKrogec(1, 20, 20);
-            posodobiZadnjiKrogec(21, 40, 40);
-        }
-    });
-}); 
+    }); 
     </script>
 </head>
 <body>
@@ -273,7 +350,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <div class="pdf-container">
         <div class="ozadje"></div>
+        <input type="text" id="polje-ime-priimek" class="input-field" placeholder="">
         <input type="text" id="polje-datum" class="input-field">
+        <!-- Dodano drugo polje za datum -->
+        <input type="text" id="polje-datum-2" class="input-field">
         
         <div class="vsebina-krogci">
             <!-- Prvi set krogcev (1-20) -->
