@@ -22,9 +22,16 @@
         box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 20px;
         font-size: 14px;
         font-weight: bold;
+    }
+
+    .checkbox-skupina {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
     }
 
     .pdf-container {
@@ -42,12 +49,12 @@
     #polje-ime-priimek {
         position: absolute;
         color: black;
-        top: 138px; /* Prilagodite, če ni točno na črti! */
-        left: 120px; /* Prilagodite zamik od levega roba */
+        top: 138px;
+        left: 120px;
         background: transparent;
         border: none;
         font-size: 15px;
-        width: 300px; /* Nastavite širino polja */
+        width: 300px;
     }
 
     /* PRVI DATUM */
@@ -65,12 +72,12 @@
     #polje-datum-2 {
         position: absolute;
         color: black;
-        top: 657px; /* Prilagojen zamik za spodnji del slike */
+        top: 657px;
         left: 200px;
         background: transparent;
         border: none;
         font-size: 15px;
-        display: none; /* Upravlja JavaScript */
+        display: none;
     }
 
     .krogec-oznaka {
@@ -190,7 +197,6 @@
             top: 5px;
         }
 
-
         /* Prvi datum pri tisku */
         #polje-datum {
             position: absolute !important;
@@ -205,12 +211,11 @@
             print-color-adjust: exact !important;
         }
 
-        
         /* Ime in priimek pri tisku */
         #polje-ime-priimek {
             position: absolute !important;
-            top: 118px !important; /* Prilagodite za tisk! */
-            left: 100px !important; /* Prilagodite za tisk! */
+            top: 118px !important;
+            left: 100px !important;
             z-index: 10 !important;
             color: black !important;
             background: transparent !important;
@@ -224,7 +229,7 @@
         /* Drugi datum pri tisku */
         #polje-datum-2 {
             position: absolute !important;
-            top: 573px !important; /* Prilagojen zamik za tisk */
+            top: 573px !important;
             left: 190px !important;
             z-index: 10 !important;
             color: black !important;
@@ -242,36 +247,64 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         
-        // 1. STIKALO ZA DODATNE KROGCE IN DRUGI DATUM
+        // 1. POVEZAVA OBEH STIKAL (PRVO IN DODATNO OCENJEVANJE)
+        const chkPrvo = document.getElementById('chk-prikazi-prvo');
+        const kontejnerPrvi = document.querySelector('.prvi-krogci');
+        const poljeIme = document.getElementById('polje-ime-priimek');
+        const poljeDatum1 = document.getElementById('polje-datum');
+
         const chkDodatno = document.getElementById('chk-prikazi-dodatno');
         const kontejnerDodatni = document.querySelector('.dodatni-krogci');
         const poljeDatum2 = document.getElementById('polje-datum-2');
 
-        if (chkDodatno && kontejnerDodatni) {
-            // Ob vsakem nalaganju strani odkljukamo in skrijemo
-            chkDodatno.checked = false;
-            kontejnerDodatni.style.display = 'none';
-            if (poljeDatum2) poljeDatum2.style.display = 'none';
+        // Pomožna funkcija za prikaz/skrivanje prvega sklopa
+        function nastaviPrvo(prikazi) {
+            if (kontejnerPrvi) kontejnerPrvi.style.display = prikazi ? 'block' : 'none';
+            if (poljeIme) poljeIme.style.display = prikazi ? 'block' : 'none';
+            if (poljeDatum1) poljeDatum1.style.display = prikazi ? 'block' : 'none';
+        }
 
-            // Poslušalec sprememb
-            chkDodatno.addEventListener('change', (e) => {
+        // Pomožna funkcija za prikaz/skrivanje dodatnega sklopa
+        function nastaviDodatno(prikazi) {
+            if (kontejnerDodatni) kontejnerDodatni.style.display = prikazi ? 'block' : 'none';
+            if (poljeDatum2) poljeDatum2.style.display = prikazi ? 'block' : 'none';
+        }
+
+        if (chkPrvo && chkDodatno) {
+            // Začetno stanje ob nalaganju strani
+            chkPrvo.checked = true;
+            nastaviPrvo(true);
+
+            chkDodatno.checked = false;
+            nastaviDodatno(false);
+
+            // Dogodek ob spremembi PRVEGA stikala
+            chkPrvo.addEventListener('change', (e) => {
                 const isChecked = e.target.checked;
-                kontejnerDodatni.style.display = isChecked ? 'block' : 'none';
-                if (poljeDatum2) poljeDatum2.style.display = isChecked ? 'block' : 'none';
+                nastaviPrvo(isChecked);
+
+                // Če odkljukamo prvo ocenjevanje, avtomatsko obkljukamo drugo
+                if (!isChecked) {
+                    chkDodatno.checked = true;
+                    nastaviDodatno(true);
+                }
+            });
+
+            // Dogodek ob spremembi DRUGEGA stikala
+            chkDodatno.addEventListener('change', (e) => {
+                nastaviDodatno(e.target.checked);
             });
         }
 
         // 2. SAMODEJNI DATUM
-        const datumPolje = document.getElementById('polje-datum');
-        if (datumPolje) {
+        if (poljeDatum1) {
             const danes = new Date();
             const dan = String(danes.getDate()).padStart(2, '0');
             const mesec = String(danes.getMonth() + 1).padStart(2, '0'); 
             const leto = danes.getFullYear();
             const formatiranDatum = `${dan}.${mesec}.${leto}`;
             
-            // Nastavimo vrednost obeh datumov
-            datumPolje.value = formatiranDatum;
+            poljeDatum1.value = formatiranDatum;
             if (poljeDatum2) poljeDatum2.value = formatiranDatum;
         }
 
@@ -342,42 +375,50 @@
 </head>
 <body>
 
-    <!-- Okvirček s kljukico, ki se NE bo natisnil -->
+    <!-- Okvirček s kljukicama, ki se NE bo natisnil -->
     <div class="kontrola-dodatno no-print">
-        <input type="checkbox" id="chk-prikazi-dodatno">
-        <label for="chk-prikazi-dodatno">Prikaži dodatno ocenjevanje</label>
+        <div class="checkbox-skupina">
+            <input type="checkbox" id="chk-prikazi-prvo" checked>
+            <label for="chk-prikazi-prvo">Prikaži prvo ocenjevanje</label>
+        </div>
+        <div class="checkbox-skupina">
+            <input type="checkbox" id="chk-prikazi-dodatno">
+            <label for="chk-prikazi-dodatno">Prikaži dodatno ocenjevanje</label>
+        </div>
     </div>
 
     <div class="pdf-container">
         <div class="ozadje"></div>
         <input type="text" id="polje-ime-priimek" class="input-field" placeholder="">
         <input type="text" id="polje-datum" class="input-field">
-        <!-- Dodano drugo polje za datum -->
         <input type="text" id="polje-datum-2" class="input-field">
         
         <div class="vsebina-krogci">
             <!-- Prvi set krogcev (1-20) -->
-            <i id="krogec-1" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-2" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-3" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-4" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-5" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-6" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-7" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-8" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-9" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-10" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-11" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-12" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-13" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-14" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-15" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-16" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-17" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-18" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-19" class="fa-regular fa-circle krogec-oznaka"></i>
-            <i id="krogec-20" class="fa-regular fa-circle krogec-oznaka"></i>
+            <div class="prvi-krogci">
+                <i id="krogec-1" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-2" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-3" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-4" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-5" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-6" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-7" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-8" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-9" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-10" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-11" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-12" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-13" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-14" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-15" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-16" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-17" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-18" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-19" class="fa-regular fa-circle krogec-oznaka"></i>
+                <i id="krogec-20" class="fa-regular fa-circle krogec-oznaka"></i>
+            </div>
 
+            <!-- Drugi set krogcev (21-40) -->
             <div class="dodatni-krogci">
                 <i id="krogec-21" class="fa-regular fa-circle krogec-oznaka"></i>
                 <i id="krogec-22" class="fa-regular fa-circle krogec-oznaka"></i>
