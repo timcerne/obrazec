@@ -175,6 +175,12 @@
             z-index: 1;
         }
 
+        /* Ko je obkljukano samo drugo ocenjevanje, pri tisku skrijemo sliko ozadja */
+        .pdf-container.brez-ozadja .ozadje {
+            display: none !important;
+            background-image: none !important;
+        }
+
         .vsebina-krogci {
             position: relative;
             z-index: 2;
@@ -195,6 +201,12 @@
         .dodatni-krogci {
             position: relative;
             top: 5px;
+        }
+
+        /* Zamik dodatnih krogcev za 4px dol, ko je obkljukano samo drugo ocenjevanje */
+        .pdf-container.brez-ozadja .vsebina-krogci .dodatni-krogci {
+            position: relative !important;
+            top: 10px !important;
         }
 
         /* Prvi datum pri tisku */
@@ -239,6 +251,11 @@
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
+
+        /* Zamik drugega datuma za 4px dol, ko je obkljukano samo drugo ocenjevanje */
+        div.pdf-container.brez-ozadja input#polje-datum-2 {
+            top: 578px !important;
+        }
     }   
     </style>
     
@@ -257,11 +274,21 @@
         const kontejnerDodatni = document.querySelector('.dodatni-krogci');
         const poljeDatum2 = document.getElementById('polje-datum-2');
 
-        // Pomožna funkcija za prikaz/skrivanje prvega sklopa
+        // Pomožna funkcija za prikaz/skrivanje prvega sklopa in ozadja pri tisku
         function nastaviPrvo(prikazi) {
             if (kontejnerPrvi) kontejnerPrvi.style.display = prikazi ? 'block' : 'none';
             if (poljeIme) poljeIme.style.display = prikazi ? 'block' : 'none';
             if (poljeDatum1) poljeDatum1.style.display = prikazi ? 'block' : 'none';
+
+            // Če prvo ocenjevanje NI prikazano, dodamo razred za skrivanje ozadja pri tisku
+            const pdfKontejner = document.querySelector('.pdf-container');
+            if (pdfKontejner) {
+                if (prikazi) {
+                    pdfKontejner.classList.remove('brez-ozadja');
+                } else {
+                    pdfKontejner.classList.add('brez-ozadja');
+                }
+            }
         }
 
         // Pomožna funkcija za prikaz/skrivanje dodatnega sklopa
